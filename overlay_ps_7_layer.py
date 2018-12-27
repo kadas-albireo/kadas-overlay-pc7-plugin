@@ -148,10 +148,10 @@ class Renderer(QgsMapLayerRenderer):
             line = self.geod.InverseLine(wgsCenter.y(), wgsCenter.x(),
                                          wgsPoint.y(), wgsPoint.x())
             dist = line.s13
-            sdist = 50
+            sdist = 500
             nSegments = max(1, int(math.ceil(dist / sdist)))
             poly = QPolygonF()
-            for iseg in range(nSegments):
+            for iseg in range(nSegments + 1):
                 coords = line.Position(iseg * sdist)
                 mapPoint = rct.transform(QgsPoint(coords["lon2"], coords["lat2"]))
                 poly.append(mapToPixel.transform(mapPoint).toQPointF())
@@ -177,7 +177,7 @@ class Renderer(QgsMapLayerRenderer):
             sdist = 50
             nSegments = max(1, int(math.ceil(dist / sdist)))
             poly = QPolygonF()
-            for iseg in range(nSegments):
+            for iseg in range(nSegments + 1):
                 if iseg in range(2):
                     continue
                 coords = line.Position(iseg * sdist)
