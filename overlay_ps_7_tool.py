@@ -22,6 +22,7 @@ class OverlayPS7Tool(QgsMapTool):
         self.layerTreeView = iface.layerTreeView()
         self.widget = OverlayPS7Widget(self.iface)
         self.widget.setVisible(False)
+        self.mapLayerRegistry = QgsMapLayerRegistry.instance()
 
         self.widget.requestPickCenter.connect(self.setPicking)
         self.widget.close.connect(self.close)
@@ -44,7 +45,7 @@ class OverlayPS7Tool(QgsMapTool):
             self.widget.setLayer(self.iface.mapCanvas().currentLayer())
         else:
             found = False
-            for layer in QgsMapLayerRegistry.instance().mapLayers().values():
+            for layer in self.mapLayerRegistry.mapLayers().values():
                 if isinstance(layer, OverlayPS7Layer):
                     self.widget.setLayer(layer)
                     found = True
@@ -87,7 +88,7 @@ class OverlayPS7Tool(QgsMapTool):
                 "edit_overlayps7_layer", mapLayer)
 
     def removeLayerTreeMenuAction(self, mapLayerId):
-        mapLayer = QgsMapLayerRegistry.instance().mapLayer(mapLayerId)
+        mapLayer = self.mapLayerRegistry.mapLayer(mapLayerId)
         if isinstance(mapLayer, OverlayPS7Layer):
             self.layerTreeView.menuProvider().removeLegendLayerActionsForLayer(
                 mapLayer)
@@ -111,6 +112,7 @@ class OverlayPS7Widget(QgsBottomBar, FORM_CLASS):
         self.iface = iface
         self.layerTreeView = iface.layerTreeView()
         self.currentLayer = None
+        self.mapLayerRegistry = QgsMapLayerRegistry.instance()
 
         self.setLayout(QHBoxLayout())
         self.layout().setSpacing(10)
@@ -160,13 +162,15 @@ class OverlayPS7Widget(QgsBottomBar, FORM_CLASS):
                 self.iface.mapCanvas().extent().center(),
                 self.iface.mapCanvas().mapSettings().destinationCrs(),
                 22.5)
-            QgsMapLayerRegistry.instance().addMapLayer(OverlayPs7Layer)
+            self.mapLayerRegistry.addMapLayer(OverlayPs7Layer)
             self.setLayer(OverlayPs7Layer)
 
     def setLayer(self, layer):
         if layer == self.currentLayer:
             return
+
         self.currentLayer = layer if isinstance(layer, OverlayPS7Layer) else False
+
         if not self.currentLayer:
             self.widgetLayerSetup.setEnabled(False)
             return
@@ -218,7 +222,7 @@ class OverlayPS7Widget(QgsBottomBar, FORM_CLASS):
         self.comboBoxLayer.clear()
         idx = 0
         current = 0
-        for layer in QgsMapLayerRegistry.instance().mapLayers().values():
+        for layer in self.mapLayerRegistry.mapLayers().values():
             if isinstance(layer, OverlayPS7Layer):
                 layer.layerNameChanged.connect(self.repopulateLayers)
                 self.comboBoxLayer.addItem(layer.name(), layer.id())
@@ -231,7 +235,7 @@ class OverlayPS7Widget(QgsBottomBar, FORM_CLASS):
         self.widgetLayerSetup.setEnabled(self.comboBoxLayer.count() > 0)
 
     def currentLayerChanged(self, cur):
-        layer = QgsMapLayerRegistry.instance().mapLayer(
+        layer = self.mapLayerRegistry.mapLayer(
             self.comboBoxLayer.itemData(cur))
         if isinstance(layer, OverlayPS7Layer):
             self.setLayer(layer)
@@ -239,6 +243,8 @@ class OverlayPS7Widget(QgsBottomBar, FORM_CLASS):
             self.widgetLayerSetup.setEnabled(False)
 
     def updateSelectedLayer(self, layer):
+        if not layer:
+            return
         if isinstance(layer, OverlayPS7Layer):
             self.setLayer(layer)
 
