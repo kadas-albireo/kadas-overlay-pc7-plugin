@@ -83,7 +83,7 @@ class OverlayPS7:
 
         self.action = QAction(icon, self.tr(u'Overlay PS 7'),
                               self.iface.mainWindow())
-        self.action.triggered.connect(self.show_dialog)
+        self.action.triggered.connect(self.activateTool)
         self.action.setEnabled(True)
 
         self.iface.addAction(self.action, self.iface.PLUGIN_MENU,
@@ -93,8 +93,7 @@ class OverlayPS7:
         QgsPluginLayerRegistry.instance().addPluginLayerType(self.pluginLayerType)
 
     def unload(self):
-        """Removes the plugin menu item and icon from QGIS GUI."""
-        self.iface.removeToolBarIcon(self.action)
+        pass
 
-    def show_dialog(self):
+    def activateTool(self):
         self.iface.mapCanvas().setMapTool(self.overlay_7_tool)
