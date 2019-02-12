@@ -49,14 +49,12 @@ class OverlayPS7:
         locale_path = os.path.join(
             self.plugin_dir,
             'i18n',
-            'OverlayPS7_{0}.qm'.format(locale))
+            'overlayps7_{0}.qm'.format(locale))
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
             self.translator.load(locale_path)
-
-            if qVersion() > '4.3.3':
-                QCoreApplication.installTranslator(self.translator)
+            QCoreApplication.installTranslator(self.translator)
 
         self.overlay_7_tool = OverlayPS7Tool(self.iface)
 
