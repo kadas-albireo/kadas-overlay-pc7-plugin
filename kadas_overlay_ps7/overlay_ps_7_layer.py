@@ -18,6 +18,7 @@ class OverlayPS7Layer(QgsPluginLayer):
         self.setValid(True)
         self.center = QgsPoint()
         self.azimut = None
+        self.azimut_fl = None  # Azimut flight lines
         self.color = Qt.red
         self.lineWidth = 3
         self.transparency = 0
@@ -27,9 +28,10 @@ class OverlayPS7Layer(QgsPluginLayer):
     def pluginLayerType(self):
         return "overlayps7"
 
-    def setup(self, center, crs, azimut):
+    def setup(self, center, crs, azimut, azimut_fl):
         self.center = center
         self.azimut = azimut
+        self.azimut_fl = azimut_fl
 
         self.setCrs(crs, False)
 
@@ -55,6 +57,9 @@ class OverlayPS7Layer(QgsPluginLayer):
     def getAzimut(self):
         return self.azimut
 
+    def getAzimutFL(self):
+        return self.azimut_fl
+
     def getColor(self):
         return self.color
 
@@ -74,6 +79,7 @@ class OverlayPS7Layer(QgsPluginLayer):
         self.center.setX(float(layerEl.attribute("x")))
         self.center.setY(float(layerEl.attribute("y")))
         self.azimut = float(layerEl.attribute("azimut"))
+        self.azimut_fl = float(layerEl.attribute("azimut_fl"))
         self.color = QgsSymbolLayerV2Utils.decodeColor(layerEl.attribute(
             "color"))
         self.lineWidth = int(layerEl.attribute("lineWidth"))
@@ -91,6 +97,7 @@ class OverlayPS7Layer(QgsPluginLayer):
         layerEl.setAttribute("x", self.center.x())
         layerEl.setAttribute("y", self.center.y())
         layerEl.setAttribute("azimut", self.azimut)
+        layerEl.setAttribute("azimut_fl", self.azimut_fl)
         layerEl.setAttribute("crs", self.crs().authid())
         layerEl.setAttribute("color", QgsSymbolLayerV2Utils.encodeColor(
             self.color))
@@ -167,7 +174,7 @@ class Renderer(QgsMapLayerRenderer):
         self.rendererContext.painter().setPen(QPen(
             self.layer.color, self.layer.lineWidth, Qt.DashLine))
         lineRadiusMeters = 1.5 * QGis.fromUnitToUnitFactor(QGis.NauticalMiles, QGis.Meters)
-        bearing = self.layer.getAzimut() + 45
+        bearing = self.layer.getAzimutFL()
         for counter in range(2):
             wgsPoint = self.mDa.computeDestination(wgsCenter,
                                                    lineRadiusMeters, bearing)

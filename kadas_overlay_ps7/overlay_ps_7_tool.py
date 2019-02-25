@@ -51,7 +51,7 @@ class OverlayPS7Tool(QgsMapTool):
                     found = True
                     break
             if not found:
-                self.widget.createLayer(self.tr("OpenlayPS7"))
+                self.widget.createLayer(self.tr("OverlayPC7"))
         self.widget.setVisible(True)
 
     def deactivate(self):
@@ -131,6 +131,7 @@ class OverlayPS7Widget(QgsBottomBar, OverlayPS7WidgetBase):
         self.inputCenter.coordinateChanged.connect(self.updateLayer)
         self.toolButtonPickCenter.clicked.connect(self.requestPickCenter)
         self.spinBoxAzimut.valueChanged.connect(self.updateLayer)
+        self.spinBoxAzimutFL.valueChanged.connect(self.updateLayer)
         self.spinBoxLineWidth.valueChanged.connect(self.updateLineWidth)
         self.toolButtonColor.colorChanged.connect(self.updateColor)
 
@@ -159,7 +160,7 @@ class OverlayPS7Widget(QgsBottomBar, OverlayPS7WidgetBase):
             OverlayPs7Layer.setup(
                 self.iface.mapCanvas().extent().center(),
                 self.iface.mapCanvas().mapSettings().destinationCrs(),
-                22.5)
+                22.5, 45)
             self.mapLayerRegistry.addMapLayer(OverlayPs7Layer)
             self.setLayer(OverlayPs7Layer)
 
@@ -186,6 +187,9 @@ class OverlayPS7Widget(QgsBottomBar, OverlayPS7WidgetBase):
         self.spinBoxAzimut.blockSignals(True)
         self.spinBoxAzimut.setValue(self.currentLayer.getAzimut())
         self.spinBoxAzimut.blockSignals(False)
+        self.spinBoxAzimutFL.blockSignals(True)
+        self.spinBoxAzimutFL.setValue(self.currentLayer.getAzimutFL())
+        self.spinBoxAzimutFL.blockSignals(False)
         self.spinBoxLineWidth.blockSignals(True)
         self.spinBoxLineWidth.setValue(self.currentLayer.getLineWidth())
         self.spinBoxLineWidth.blockSignals(False)
@@ -200,7 +204,8 @@ class OverlayPS7Widget(QgsBottomBar, OverlayPS7WidgetBase):
         center = self.inputCenter.getCoordinate()
         crs = self.inputCenter.getCrs()
         azimut = self.spinBoxAzimut.value()
-        self.currentLayer.setup(center, crs, azimut)
+        azimut_fl = self.spinBoxAzimutFL.value()
+        self.currentLayer.setup(center, crs, azimut, azimut_fl)
         self.currentLayer.triggerRepaint()
 
     def updateColor(self, color):
