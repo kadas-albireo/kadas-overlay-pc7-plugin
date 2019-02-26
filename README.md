@@ -1,9 +1,9 @@
-KADAS Overlay PS7 Plugin
+KADAS Overlay PC7 Plugin
 =======================
 
 
 Create tarball
 --------------
 
-    cd kadas_overlay7_ps
+    cd kadas_overlay_pc7
     make

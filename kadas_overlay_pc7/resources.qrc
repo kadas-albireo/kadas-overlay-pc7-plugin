@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/plugins/OverlayPS7" >
+    <qresource prefix="/plugins/OverlayPC7" >
         <file>icon.png</file>
     </qresource>
 </RCC>

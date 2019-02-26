@@ -24,5 +24,5 @@
 
 
 def classFactory(iface):
-    from .overlay_ps_7 import OverlayPS7
-    return OverlayPS7(iface)
+    from .overlay_pc7 import OverlayPC7
+    return OverlayPC7(iface)

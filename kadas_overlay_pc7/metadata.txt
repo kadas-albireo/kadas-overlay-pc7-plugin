@@ -7,14 +7,14 @@
 # This file should be included when you package your plugin.# Mandatory items:
 
 [general]
-name=overlay_ps_7
+name=overlay_pc7
 qgisMinimumVersion=2.0
 description=This plugin paints an overlay
 version=1.0
 author=Sourcepole AG
 email=smani@sourcepole.ch
 
-about=KADAS Overlay PS7 plugin.
+about=KADAS Overlay PC7 plugin.
 
 tracker=
 repository=

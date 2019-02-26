@@ -2,40 +2,40 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="it">
 <context>
-    <name>OverlayPS7</name>
+    <name>OverlayPC7</name>
     <message>
-        <location filename="../overlay_ps_7.py" line="84"/>
-        <source>Overlay PS 7</source>
-        <translation>Overlay PS 7</translation>
+        <location filename="../overlay_pc7.py" line="84"/>
+        <source>Overlay PC7</source>
+        <translation>Overlay PC7</translation>
     </message>
 </context>
 <context>
-    <name>OverlayPS7Tool</name>
+    <name>OverlayPC7Tool</name>
     <message>
-        <location filename="../overlay_ps_7_tool.py" line="30"/>
+        <location filename="../overlay_pc7_tool.py" line="30"/>
         <source>Edit</source>
         <translation>Modifica</translation>
     </message>
     <message>
-        <location filename="../overlay_ps_7_tool.py" line="54"/>
-        <source>OpenlayPS7</source>
-        <translation>OpenlayPS7</translation>
+        <location filename="../overlay_pc7_tool.py" line="54"/>
+        <source>OpenlayPC7</source>
+        <translation>OpenlayPC7</translation>
     </message>
 </context>
 <context>
-    <name>OverlayPS7Widget</name>
+    <name>OverlayPC7Widget</name>
     <message>
-        <location filename="../overlay_ps_7_tool.py" line="127"/>
+        <location filename="../overlay_pc7_tool.py" line="127"/>
         <source>Close</source>
         <translation>Chiudi</translation>
     </message>
     <message>
-        <location filename="../overlay_ps_7_tool.py" line="156"/>
+        <location filename="../overlay_pc7_tool.py" line="156"/>
         <source>Layer Name</source>
         <translation>Nome layer</translation>
     </message>
     <message>
-        <location filename="../overlay_ps_7_tool.py" line="156"/>
+        <location filename="../overlay_pc7_tool.py" line="156"/>
         <source>Enter name of new layer:</source>
         <translation>Nome del nuovo layer:</translation>
     </message>

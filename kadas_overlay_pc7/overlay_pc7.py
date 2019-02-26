@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 /***************************************************************************
- OverlayPS7
+ OverlayPC7
                                  A QGIS plugin
  This plugin paints an overlay
                               -------------------
@@ -23,13 +23,13 @@
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
 from PyQt4.QtGui import QAction, QIcon
 import resources_rc
-from overlay_ps_7_tool import OverlayPS7Tool
-from overlay_ps_7_layer import OverlayPS7LayerType
+from overlay_pc7_tool import OverlayPC7Tool
+from overlay_pc7_layer import OverlayPC7LayerType
 import os.path
 from qgis.core import *
 
 
-class OverlayPS7:
+class OverlayPC7:
     """QGIS Plugin Implementation."""
 
     def __init__(self, iface):
@@ -49,14 +49,14 @@ class OverlayPS7:
         locale_path = os.path.join(
             self.plugin_dir,
             'i18n',
-            'overlayps7_{0}.qm'.format(locale))
+            'overlaypc7_{0}.qm'.format(locale))
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
             self.translator.load(locale_path)
             QCoreApplication.installTranslator(self.translator)
 
-        self.overlay_7_tool = OverlayPS7Tool(self.iface)
+        self.overlay_7_tool = OverlayPC7Tool(self.iface)
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -71,15 +71,15 @@ class OverlayPS7:
         :rtype: QString
         """
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
-        return QCoreApplication.translate('OverlayPS7', message)
+        return QCoreApplication.translate('OverlayPC7', message)
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        icon_path = ':/plugins/OverlayPS7/icon.png'
+        icon_path = ':/plugins/OverlayPC7/icon.png'
         icon = QIcon(icon_path)
 
-        self.action = QAction(icon, self.tr(u'Overlay PS 7'),
+        self.action = QAction(icon, self.tr(u'Overlay PC7'),
                               self.iface.mainWindow())
         self.action.triggered.connect(self.activateTool)
         self.action.setEnabled(True)
@@ -87,7 +87,7 @@ class OverlayPS7:
         self.iface.addAction(self.action, self.iface.PLUGIN_MENU,
                              self.iface.NO_TOOLBAR, self.iface.DRAW_TAB)
 
-        self.pluginLayerType = OverlayPS7LayerType()
+        self.pluginLayerType = OverlayPC7LayerType()
         QgsPluginLayerRegistry.instance().addPluginLayerType(self.pluginLayerType)
 
     def unload(self):

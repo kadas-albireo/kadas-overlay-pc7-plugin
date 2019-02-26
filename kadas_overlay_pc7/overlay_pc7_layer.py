@@ -10,7 +10,7 @@ from qgis.core import *
 from qgis.gui import *
 
 
-class OverlayPS7Layer(QgsPluginLayer):
+class OverlayPC7Layer(QgsPluginLayer):
 
     def __init__(self, layer_name):
         QgsPluginLayer.__init__(self, self.pluginLayerType(), layer_name)
@@ -26,7 +26,7 @@ class OverlayPS7Layer(QgsPluginLayer):
 
     @classmethod
     def pluginLayerType(self):
-        return "overlayps7"
+        return "overlaypc7"
 
     def setup(self, center, crs, azimut, azimut_fl):
         self.center = center
@@ -202,12 +202,12 @@ class Renderer(QgsMapLayerRenderer):
         return True
 
 
-class OverlayPS7LayerType(QgsPluginLayerType):
+class OverlayPC7LayerType(QgsPluginLayerType):
     def __init__(self):
-        QgsPluginLayerType.__init__(self, OverlayPS7Layer.pluginLayerType())
+        QgsPluginLayerType.__init__(self, OverlayPC7Layer.pluginLayerType())
 
     def createLayer(self):
-        return OverlayPS7Layer("OverlayPS7")
+        return OverlayPC7Layer("OverlayPC7")
 
     def hasLayerProperties(self):
         return 0

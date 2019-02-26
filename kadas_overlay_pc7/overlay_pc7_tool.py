@@ -6,13 +6,13 @@ from PyQt4.QtGui import *
 from qgis.core import *
 from qgis.gui import *
 
-from overlay_ps_7_layer import OverlayPS7Layer
+from overlay_pc7_layer import OverlayPC7Layer
 
-OverlayPS7WidgetBase = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), 'overlay_ps_7_dialog_base.ui'))[0]
+OverlayPC7WidgetBase = uic.loadUiType(os.path.join(
+    os.path.dirname(__file__), 'overlay_pc7_dialog_base.ui'))[0]
 
 
-class OverlayPS7Tool(QgsMapTool):
+class OverlayPC7Tool(QgsMapTool):
 
     def __init__(self, iface):
         QgsMapTool.__init__(self, iface.mapCanvas())
@@ -20,7 +20,7 @@ class OverlayPS7Tool(QgsMapTool):
         self.iface = iface
         self.picking = False
         self.layerTreeView = iface.layerTreeView()
-        self.widget = OverlayPS7Widget(self.iface)
+        self.widget = OverlayPC7Widget(self.iface)
         self.widget.setVisible(False)
         self.mapLayerRegistry = QgsMapLayerRegistry.instance()
 
@@ -32,7 +32,7 @@ class OverlayPS7Tool(QgsMapTool):
             ":/images/themes/default/mIconEditable.png"))
         self.actionEditLayer.triggered.connect(self.editCurrentLayer)
         self.layerTreeView.menuProvider().addLegendLayerAction(
-            self.actionEditLayer, "", "edit_overlayps7_layer",
+            self.actionEditLayer, "", "edit_overlaypc7_layer",
             QgsMapLayer.PluginLayer, False)
 
         QgsMapLayerRegistry.instance().layerWasAdded.connect(
@@ -41,12 +41,12 @@ class OverlayPS7Tool(QgsMapTool):
             self.removeLayerTreeMenuAction)
 
     def activate(self):
-        if isinstance(self.iface.mapCanvas().currentLayer(), OverlayPS7Layer):
+        if isinstance(self.iface.mapCanvas().currentLayer(), OverlayPC7Layer):
             self.widget.setLayer(self.iface.mapCanvas().currentLayer())
         else:
             found = False
             for layer in self.mapLayerRegistry.mapLayers().values():
-                if isinstance(layer, OverlayPS7Layer):
+                if isinstance(layer, OverlayPC7Layer):
                     self.widget.setLayer(layer)
                     found = True
                     break
@@ -81,25 +81,25 @@ class OverlayPS7Tool(QgsMapTool):
         self.iface.mapCanvas().unsetMapTool(self)
 
     def addLayerTreeMenuAction(self, mapLayer):
-        if isinstance(mapLayer, OverlayPS7Layer):
+        if isinstance(mapLayer, OverlayPC7Layer):
             self.layerTreeView.menuProvider().addLegendLayerActionForLayer(
-                "edit_overlayps7_layer", mapLayer)
+                "edit_overlaypc7_layer", mapLayer)
 
     def removeLayerTreeMenuAction(self, mapLayerId):
         mapLayer = self.mapLayerRegistry.mapLayer(mapLayerId)
-        if isinstance(mapLayer, OverlayPS7Layer):
+        if isinstance(mapLayer, OverlayPC7Layer):
             self.layerTreeView.menuProvider().removeLegendLayerActionsForLayer(
                 mapLayer)
 
     def editCurrentLayer(self):
-        if isinstance(self.iface.mapCanvas().currentLayer(), OverlayPS7Layer):
+        if isinstance(self.iface.mapCanvas().currentLayer(), OverlayPC7Layer):
             self.iface.mapCanvas().setMapTool(self)
 
     def tr(self, message):
-        return QCoreApplication.translate('OverlayPS7', message)
+        return QCoreApplication.translate('OverlayPC7', message)
 
 
-class OverlayPS7Widget(QgsBottomBar, OverlayPS7WidgetBase):
+class OverlayPC7Widget(QgsBottomBar, OverlayPC7WidgetBase):
 
     requestPickCenter = pyqtSignal()
     close = pyqtSignal()
@@ -156,19 +156,19 @@ class OverlayPS7Widget(QgsBottomBar, OverlayPS7WidgetBase):
                 self, self.tr("Layer Name"),
                 self.tr("Enter name of new layer:"))[0]
         if layerName:
-            OverlayPs7Layer = OverlayPS7Layer(layerName)
-            OverlayPs7Layer.setup(
+            overlayPC7Layer = OverlayPC7Layer(layerName)
+            overlayPC7Layer.setup(
                 self.iface.mapCanvas().extent().center(),
                 self.iface.mapCanvas().mapSettings().destinationCrs(),
                 22.5, 45)
-            self.mapLayerRegistry.addMapLayer(OverlayPs7Layer)
-            self.setLayer(OverlayPs7Layer)
+            self.mapLayerRegistry.addMapLayer(overlayPC7Layer)
+            self.setLayer(overlayPC7Layer)
 
     def setLayer(self, layer):
         if layer == self.currentLayer:
             return
 
-        self.currentLayer = layer if isinstance(layer, OverlayPS7Layer) else False
+        self.currentLayer = layer if isinstance(layer, OverlayPC7Layer) else False
 
         if not self.currentLayer:
             self.widgetLayerSetup.setEnabled(False)
@@ -226,7 +226,7 @@ class OverlayPS7Widget(QgsBottomBar, OverlayPS7WidgetBase):
         idx = 0
         current = 0
         for layer in self.mapLayerRegistry.mapLayers().values():
-            if isinstance(layer, OverlayPS7Layer):
+            if isinstance(layer, OverlayPC7Layer):
                 layer.layerNameChanged.connect(self.repopulateLayers)
                 self.comboBoxLayer.addItem(layer.name(), layer.id())
                 if self.iface.mapCanvas().currentLayer() == layer:
@@ -240,7 +240,7 @@ class OverlayPS7Widget(QgsBottomBar, OverlayPS7WidgetBase):
     def currentLayerChanged(self, cur):
         layer = self.mapLayerRegistry.mapLayer(
             self.comboBoxLayer.itemData(cur))
-        if isinstance(layer, OverlayPS7Layer):
+        if isinstance(layer, OverlayPC7Layer):
             self.setLayer(layer)
         else:
             self.widgetLayerSetup.setEnabled(False)
@@ -248,8 +248,8 @@ class OverlayPS7Widget(QgsBottomBar, OverlayPS7WidgetBase):
     def updateSelectedLayer(self, layer):
         if not layer:
             return
-        if isinstance(layer, OverlayPS7Layer):
+        if isinstance(layer, OverlayPC7Layer):
             self.setLayer(layer)
 
     def tr(self, message):
-        return QCoreApplication.translate('OverlayPS7', message)
+        return QCoreApplication.translate('OverlayPC7', message)
