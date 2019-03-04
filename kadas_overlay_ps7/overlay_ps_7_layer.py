@@ -174,7 +174,7 @@ class Renderer(QgsMapLayerRenderer):
         self.rendererContext.painter().setPen(QPen(
             self.layer.color, self.layer.lineWidth, Qt.DashLine))
         lineRadiusMeters = 1.5 * QGis.fromUnitToUnitFactor(QGis.NauticalMiles, QGis.Meters)
-        bearing = self.layer.getAzimutFL()
+        bearing = self.layer.getAzimutFL() + self.layer.getAzimut()
         for counter in range(2):
             wgsPoint = self.mDa.computeDestination(wgsCenter,
                                                    lineRadiusMeters, bearing)
