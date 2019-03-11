@@ -131,7 +131,8 @@ class OverlayPC7Widget(QgsBottomBar, OverlayPC7WidgetBase):
         self.inputCenter.coordinateChanged.connect(self.updateLayer)
         self.toolButtonPickCenter.clicked.connect(self.requestPickCenter)
         self.spinBoxAzimut.valueChanged.connect(self.updateLayer)
-        self.spinBoxAzimutFL.valueChanged.connect(self.updateLayer)
+        self.spinBoxLeftFL.valueChanged.connect(self.updateLayer)
+        self.spinBoxRightFL.valueChanged.connect(self.updateLayer)
         self.spinBoxLineWidth.valueChanged.connect(self.updateLineWidth)
         self.toolButtonColor.colorChanged.connect(self.updateColor)
 
@@ -160,7 +161,7 @@ class OverlayPC7Widget(QgsBottomBar, OverlayPC7WidgetBase):
             overlayPC7Layer.setup(
                 self.iface.mapCanvas().extent().center(),
                 self.iface.mapCanvas().mapSettings().destinationCrs(),
-                22.5, 45)
+                22.5, 45, 135)
             self.mapLayerRegistry.addMapLayer(overlayPC7Layer)
             self.setLayer(overlayPC7Layer)
 
@@ -187,9 +188,12 @@ class OverlayPC7Widget(QgsBottomBar, OverlayPC7WidgetBase):
         self.spinBoxAzimut.blockSignals(True)
         self.spinBoxAzimut.setValue(self.currentLayer.getAzimut())
         self.spinBoxAzimut.blockSignals(False)
-        self.spinBoxAzimutFL.blockSignals(True)
-        self.spinBoxAzimutFL.setValue(self.currentLayer.getAzimutFL())
-        self.spinBoxAzimutFL.blockSignals(False)
+        self.spinBoxLeftFL.blockSignals(True)
+        self.spinBoxLeftFL.setValue(self.currentLayer.getAzimutLeftFL())
+        self.spinBoxLeftFL.blockSignals(False)
+        self.spinBoxRightFL.blockSignals(True)
+        self.spinBoxRightFL.setValue(self.currentLayer.getAzimutRightFL())
+        self.spinBoxRightFL.blockSignals(False)
         self.spinBoxLineWidth.blockSignals(True)
         self.spinBoxLineWidth.setValue(self.currentLayer.getLineWidth())
         self.spinBoxLineWidth.blockSignals(False)
@@ -204,8 +208,9 @@ class OverlayPC7Widget(QgsBottomBar, OverlayPC7WidgetBase):
         center = self.inputCenter.getCoordinate()
         crs = self.inputCenter.getCrs()
         azimut = self.spinBoxAzimut.value()
-        azimut_fl = self.spinBoxAzimutFL.value()
-        self.currentLayer.setup(center, crs, azimut, azimut_fl)
+        azimutLeftFL = self.spinBoxLeftFL.value()
+        azimutRightFL = self.spinBoxRightFL.value()
+        self.currentLayer.setup(center, crs, azimut, azimutLeftFL, azimutRightFL)
         self.currentLayer.triggerRepaint()
 
     def updateColor(self, color):

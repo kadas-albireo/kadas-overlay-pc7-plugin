@@ -18,7 +18,8 @@ class OverlayPC7Layer(QgsPluginLayer):
         self.setValid(True)
         self.center = QgsPoint()
         self.azimut = None
-        self.azimut_fl = None  # Azimut flight lines
+        self.azimutLeftFL = None  # Azimut left flight line
+        self.azimutRightFL = None  # Azimut right flight line
         self.color = Qt.red
         self.lineWidth = 3
         self.transparency = 0
@@ -28,10 +29,11 @@ class OverlayPC7Layer(QgsPluginLayer):
     def pluginLayerType(self):
         return "overlaypc7"
 
-    def setup(self, center, crs, azimut, azimut_fl):
+    def setup(self, center, crs, azimut, azimutLeftFL, azimutRightFL):
         self.center = center
         self.azimut = azimut
-        self.azimut_fl = azimut_fl
+        self.azimutLeftFL = azimutLeftFL
+        self.azimutRightFL = azimutRightFL
 
         self.setCrs(crs, False)
 
@@ -57,8 +59,11 @@ class OverlayPC7Layer(QgsPluginLayer):
     def getAzimut(self):
         return self.azimut
 
-    def getAzimutFL(self):
-        return self.azimut_fl
+    def getAzimutLeftFL(self):
+        return self.azimutLeftFL
+
+    def getAzimutRightFL(self):
+        return self.azimutRightFL
 
     def getColor(self):
         return self.color
@@ -79,7 +84,8 @@ class OverlayPC7Layer(QgsPluginLayer):
         self.center.setX(float(layerEl.attribute("x")))
         self.center.setY(float(layerEl.attribute("y")))
         self.azimut = float(layerEl.attribute("azimut"))
-        self.azimut_fl = float(layerEl.attribute("azimut_fl"))
+        self.azimutLeftFL = float(layerEl.attribute("azimutLeftFL"))
+        self.azimutRightFL = float(layerEl.attribute("azimutRightFL"))
         self.color = QgsSymbolLayerV2Utils.decodeColor(layerEl.attribute(
             "color"))
         self.lineWidth = int(layerEl.attribute("lineWidth"))
@@ -97,7 +103,8 @@ class OverlayPC7Layer(QgsPluginLayer):
         layerEl.setAttribute("x", self.center.x())
         layerEl.setAttribute("y", self.center.y())
         layerEl.setAttribute("azimut", self.azimut)
-        layerEl.setAttribute("azimut_fl", self.azimut_fl)
+        layerEl.setAttribute("azimutLeftFL", self.azimutLeftFL)
+        layerEl.setAttribute("azimutRightFL", self.azimutRightFL)
         layerEl.setAttribute("crs", self.crs().authid())
         layerEl.setAttribute("color", QgsSymbolLayerV2Utils.encodeColor(
             self.color))
@@ -174,10 +181,10 @@ class Renderer(QgsMapLayerRenderer):
         self.rendererContext.painter().setPen(QPen(
             self.layer.color, self.layer.lineWidth, Qt.DashLine))
         lineRadiusMeters = 1.5 * QGis.fromUnitToUnitFactor(QGis.NauticalMiles, QGis.Meters)
-        bearing = self.layer.getAzimutFL() + self.layer.getAzimut()
-        for counter in range(2):
+        for bearing in [self.layer.azimutLeftFL, self.layer.azimutRightFL]:
             wgsPoint = self.mDa.computeDestination(wgsCenter,
-                                                   lineRadiusMeters, bearing)
+                                                   lineRadiusMeters,
+                                                   self.layer.getAzimut() + bearing)
             line = self.geod.InverseLine(wgsCenter.y(), wgsCenter.x(),
                                          wgsPoint.y(), wgsPoint.x())
             dist = line.s13
@@ -196,7 +203,6 @@ class Renderer(QgsMapLayerRenderer):
             path = QPainterPath()
             path.addPolygon(poly)
             self.rendererContext.painter().drawPath(path)
-            bearing += 90
 
         self.rendererContext.painter().restore()
         return True
