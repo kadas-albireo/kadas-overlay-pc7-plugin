@@ -1,7 +1,8 @@
 SOURCES += overlay_pc7_layer.py \
            overlay_pc7.py \
-           overlay_pc7_tool.py \
-           overlay_pc7_dialog_base.ui
+           overlay_pc7_tool.py
+
+FORMS += overlay_pc7_dialog_base.ui
 
 
 
