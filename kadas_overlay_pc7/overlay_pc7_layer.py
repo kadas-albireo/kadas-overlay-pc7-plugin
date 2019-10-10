@@ -3,9 +3,8 @@ import math
 from enum import Enum
 from geographiclib.geodesic import Geodesic
 
-from PyQt4 import uic
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from qgis.PyQt.QtCore import *
+from qgis.PyQt.QtGui import *
 from qgis.core import *
 from qgis.gui import *
 
@@ -16,7 +15,7 @@ class OverlayPC7Layer(QgsPluginLayer):
         QgsPluginLayer.__init__(self, self.pluginLayerType(), layer_name)
 
         self.setValid(True)
-        self.center = QgsPoint()
+        self.center = QgsPointXY()
         self.azimut = None
         self.azimutLeftFL = None  # Azimut left flight line
         self.azimutRightFL = None  # Azimut right flight line
@@ -28,6 +27,9 @@ class OverlayPC7Layer(QgsPluginLayer):
     @classmethod
     def pluginLayerType(self):
         return "overlaypc7"
+
+    def setTransformContext(self, context):
+        pass
 
     def setup(self, center, crs, azimut, azimutLeftFL, azimutRightFL):
         self.center = center
@@ -48,21 +50,31 @@ class OverlayPC7Layer(QgsPluginLayer):
 
     def extent(self):
         radius = 230
-        radius *= QGis.fromUnitToUnitFactor(QGis.Meters, self.crs().mapUnits())
+        radius *= QgsUnitTypes.fromUnitToUnitFactor(
+            QgsUnitTypes.DistanceMeters, self.crs().mapUnits())
 
         return QgsRectangle(self.center.x() - radius, self.center.y() - radius,
                             self.center.x() + radius, self.center.y() + radius)
 
+    def azimutToRadiant(self, azimut):
+        return (azimut / 180) * math.pi
+
     def getCenter(self):
         return self.center
 
-    def getAzimut(self):
+    def getAzimut(self, radiant=False):
+        if radiant:
+            return self.azimutToRadiant(self.azimut)
         return self.azimut
 
-    def getAzimutLeftFL(self):
+    def getAzimutLeftFL(self, radiant=False):
+        if radiant:
+            return self.azimutToRadiant(self.azimutLeftFL)
         return self.azimutLeftFL
 
-    def getAzimutRightFL(self):
+    def getAzimutRightFL(self, radiant=False):
+        if radiant:
+            return self.azimutToRadiant(self.azimutRightFL)
         return self.azimutRightFL
 
     def getColor(self):
@@ -77,7 +89,7 @@ class OverlayPC7Layer(QgsPluginLayer):
     def setLineWidth(self, lineWidth):
         self.lineWidth = lineWidth
 
-    def readXml(self, layer_node):
+    def readXml(self, layer_node, context):
         layerEl = layer_node.toElement()
         self.layer_name = layerEl.attribute("title")
         self.transparency = int(layerEl.attribute("transparency"))
@@ -86,15 +98,14 @@ class OverlayPC7Layer(QgsPluginLayer):
         self.azimut = float(layerEl.attribute("azimut"))
         self.azimutLeftFL = float(layerEl.attribute("azimutLeftFL"))
         self.azimutRightFL = float(layerEl.attribute("azimutRightFL"))
-        self.color = QgsSymbolLayerV2Utils.decodeColor(layerEl.attribute(
+        self.color = QgsSymbolLayerUtils.decodeColor(layerEl.attribute(
             "color"))
         self.lineWidth = int(layerEl.attribute("lineWidth"))
 
-        self.setCrs(QgsCRSCache.instance().crsByAuthId(layerEl.attribute(
-            "crs")))
+        self.setCrs(QgsCoordinateReferenceSystem(layerEl.attribute("crs")))
         return True
 
-    def writeXml(self, layer_node, document):
+    def writeXml(self, layer_node, document, context):
         layerEl = layer_node.toElement()
         layerEl.setAttribute("type", "plugin")
         layerEl.setAttribute("name", self.pluginLayerType())
@@ -106,7 +117,7 @@ class OverlayPC7Layer(QgsPluginLayer):
         layerEl.setAttribute("azimutLeftFL", self.azimutLeftFL)
         layerEl.setAttribute("azimutRightFL", self.azimutRightFL)
         layerEl.setAttribute("crs", self.crs().authid())
-        layerEl.setAttribute("color", QgsSymbolLayerV2Utils.encodeColor(
+        layerEl.setAttribute("color", QgsSymbolLayerUtils.encodeColor(
             self.color))
         layerEl.setAttribute("lineWidth", self.getLineWidth())
         return True
@@ -122,8 +133,8 @@ class Renderer(QgsMapLayerRenderer):
         self.mDa = QgsDistanceArea()
 
         self.mDa.setEllipsoid("WGS84")
-        self.mDa.setEllipsoidalMode(True)
-        self.mDa.setSourceCrs(QgsCRSCache.instance().crsByAuthId("EPSG:4326"))
+        self.mDa.setSourceCrs(QgsCoordinateReferenceSystem("EPSG:4326"),
+                              QgsProject.instance().transformContext())
 
     def render(self):
         mapToPixel = self.rendererContext.mapToPixel()
@@ -135,10 +146,12 @@ class Renderer(QgsMapLayerRenderer):
         self.rendererContext.painter().setPen(
             QPen(self.layer.color, self.layer.lineWidth))
 
-        ct = QgsCoordinateTransformCache.instance().transform(
-            self.layer.crs().authid(), "EPSG:4326")
-        rct = QgsCoordinateTransformCache.instance().transform(
-            "EPSG:4326", self.rendererContext.coordinateTransform().destCRS().authid() if self.rendererContext.coordinateTransform() else self.layer.crs().authid())
+        ct = QgsCoordinateTransform(self.layer.crs(),
+                                    QgsCoordinateReferenceSystem("EPSG:4326"),
+                                    QgsProject.instance())
+        rct = QgsCoordinateTransform(QgsCoordinateReferenceSystem("EPSG:4326"),
+                                     self.layer.crs(),
+                                     QgsProject.instance())
 
         # draw rings
         wgsCenter = ct.transform(self.layer.center)
@@ -146,7 +159,8 @@ class Renderer(QgsMapLayerRenderer):
         radMeters = 230
         poly = QPolygonF()
         for a in range(361):
-            wgsPoint = self.mDa.computeDestination(wgsCenter, radMeters, a)
+            wgsPoint = self.mDa.computeSpheroidProject(
+                wgsCenter, radMeters, self.layer.azimutToRadiant(a))
             mapPoint = rct.transform(wgsPoint)
             poly.append(mapToPixel.transform(mapPoint).toQPointF())
         path = QPainterPath()
@@ -154,11 +168,13 @@ class Renderer(QgsMapLayerRenderer):
         self.rendererContext.painter().drawPath(path)
 
         # draw axes
-        axisRadiusMeters = 1 * QGis.fromUnitToUnitFactor(QGis.NauticalMiles, QGis.Meters)
-        bearing = self.layer.getAzimut()
+        axisRadiusMeters = 1 * QgsUnitTypes.fromUnitToUnitFactor(
+            QgsUnitTypes.DistanceNauticalMiles, QgsUnitTypes.DistanceMeters)
+        bearing = self.layer.getAzimut(True)
         for counter in range(2):
-            wgsPoint = self.mDa.computeDestination(wgsCenter,
-                                                   axisRadiusMeters, bearing)
+            wgsPoint = self.mDa.computeSpheroidProject(wgsCenter,
+                                                       axisRadiusMeters,
+                                                       bearing)
             line = self.geod.InverseLine(wgsCenter.y(), wgsCenter.x(),
                                          wgsPoint.y(), wgsPoint.x())
             dist = line.s13
@@ -167,24 +183,29 @@ class Renderer(QgsMapLayerRenderer):
             poly = QPolygonF()
             for iseg in range(nSegments + 1):
                 coords = line.Position(iseg * sdist)
-                mapPoint = rct.transform(QgsPoint(coords["lon2"], coords["lat2"]))
+                mapPoint = rct.transform(
+                    QgsPointXY(coords["lon2"], coords["lat2"]))
                 poly.append(mapToPixel.transform(mapPoint).toQPointF())
             line.Position(dist)
-            mapPoint = rct.transform(QgsPoint(coords["lon2"], coords["lat2"]))
+            mapPoint = rct.transform(QgsPointXY(
+                coords["lon2"], coords["lat2"]))
             poly.append(mapToPixel.transform(mapPoint).toQPointF())
             path = QPainterPath()
             path.addPolygon(poly)
             self.rendererContext.painter().drawPath(path)
-            bearing = self.layer.getAzimut() + 180
+            bearing = self.layer.getAzimut(True) + self.layer.azimutToRadiant(
+                180)
 
         # draw flight lines
         self.rendererContext.painter().setPen(QPen(
             self.layer.color, self.layer.lineWidth, Qt.DashLine))
-        lineRadiusMeters = 1.5 * QGis.fromUnitToUnitFactor(QGis.NauticalMiles, QGis.Meters)
-        for bearing in [self.layer.azimutLeftFL, self.layer.azimutRightFL]:
-            wgsPoint = self.mDa.computeDestination(wgsCenter,
-                                                   lineRadiusMeters,
-                                                   self.layer.getAzimut() + bearing)
+        lineRadiusMeters = 1.5 * QgsUnitTypes.fromUnitToUnitFactor(
+            QgsUnitTypes.DistanceNauticalMiles, QgsUnitTypes.DistanceMeters)
+        for bearing in [self.layer.getAzimutLeftFL(True),
+                        self.layer.getAzimutRightFL(True)]:
+            wgsPoint = self.mDa.computeSpheroidProject(
+                wgsCenter, lineRadiusMeters, self.layer.getAzimut(
+                    True) + bearing)
             line = self.geod.InverseLine(wgsCenter.y(), wgsCenter.x(),
                                          wgsPoint.y(), wgsPoint.x())
             dist = line.s13
@@ -195,10 +216,12 @@ class Renderer(QgsMapLayerRenderer):
                 if iseg in range(2):
                     continue
                 coords = line.Position(iseg * sdist)
-                mapPoint = rct.transform(QgsPoint(coords["lon2"], coords["lat2"]))
+                mapPoint = rct.transform(
+                    QgsPointXY(coords["lon2"], coords["lat2"]))
                 poly.append(mapToPixel.transform(mapPoint).toQPointF())
             line.Position(dist)
-            mapPoint = rct.transform(QgsPoint(coords["lon2"], coords["lat2"]))
+            mapPoint = rct.transform(
+                QgsPointXY(coords["lon2"], coords["lat2"]))
             poly.append(mapToPixel.transform(mapPoint).toQPointF())
             path = QPainterPath()
             path.addPolygon(poly)
