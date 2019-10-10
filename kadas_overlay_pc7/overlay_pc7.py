@@ -20,11 +20,13 @@
  *                                                                         *
  ***************************************************************************/
 """
-from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
-from PyQt4.QtGui import QAction, QIcon
-import resources_rc
-from overlay_pc7_tool import OverlayPC7Tool
-from overlay_pc7_layer import OverlayPC7LayerType
+from qgis.PyQt.QtCore import *
+from qgis.PyQt.QtGui import *
+from qgis.PyQt.QtWidgets import *
+from kadas.kadasgui import *
+from . import resources_rc
+from .overlay_pc7_tool import OverlayPC7Tool
+from .overlay_pc7_layer import OverlayPC7LayerType
 import os.path
 from qgis.core import *
 
@@ -40,23 +42,22 @@ class OverlayPC7:
             application at run time.
         :type iface: QgisInterface
         """
-        # Save reference to the QGIS interface
-        self.iface = iface
+        # Save reference to the QGIS interface and Kadas interface
+        self.iface = KadasPluginInterface.cast(iface)
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
         # initialize locale
-        locale = QSettings().value('locale/userLocale')[0:2]
-        locale_path = os.path.join(
-            self.plugin_dir,
-            'i18n',
-            'overlaypc7_{0}.qm'.format(locale))
+        if QSettings().value('locale/userLocale'):
+            locale = QSettings().value('locale/userLocale')[0:2]
+            locale_path = os.path.join(
+                self.plugin_dir,
+                'i18n',
+                'overlaypc7_{0}.qm'.format(locale))
 
-        if os.path.exists(locale_path):
-            self.translator = QTranslator()
-            self.translator.load(locale_path)
-            QCoreApplication.installTranslator(self.translator)
-
-        self.overlay_7_tool = OverlayPC7Tool(self.iface)
+            if os.path.exists(locale_path):
+                self.translator = QTranslator()
+                self.translator.load(locale_path)
+                QCoreApplication.installTranslator(self.translator)
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -85,13 +86,15 @@ class OverlayPC7:
         self.action.setEnabled(True)
 
         self.iface.addAction(self.action, self.iface.PLUGIN_MENU,
-                             self.iface.NO_TOOLBAR, self.iface.DRAW_TAB)
+                             self.iface.DRAW_TAB)
 
         self.pluginLayerType = OverlayPC7LayerType()
-        QgsPluginLayerRegistry.instance().addPluginLayerType(self.pluginLayerType)
+        QgsApplication.pluginLayerRegistry().addPluginLayerType(
+            self.pluginLayerType)
 
     def unload(self):
         pass
 
     def activateTool(self):
+        self.overlay_7_tool = OverlayPC7Tool(self.iface)
         self.iface.mapCanvas().setMapTool(self.overlay_7_tool)
