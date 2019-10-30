@@ -5,14 +5,16 @@ from geographiclib.geodesic import Geodesic
 
 from qgis.PyQt.QtCore import *
 from qgis.PyQt.QtGui import *
+from qgis.PyQt.QtWidgets import *
 from qgis.core import *
 from qgis.gui import *
+from kadas.kadascore import *
 
 
-class OverlayPC7Layer(QgsPluginLayer):
+class OverlayPC7Layer(KadasPluginLayer):
 
     def __init__(self, layer_name):
-        QgsPluginLayer.__init__(self, self.pluginLayerType(), layer_name)
+        KadasPluginLayer.__init__(self, self.layerTypeKey(), layer_name)
 
         self.setValid(True)
         self.center = QgsPointXY()
@@ -25,11 +27,11 @@ class OverlayPC7Layer(QgsPluginLayer):
         self.layer_name = layer_name
 
     @classmethod
-    def pluginLayerType(self):
+    def layerType(self):
         return "overlaypc7"
 
-    def setTransformContext(self, context):
-        pass
+    def layerTypeKey(self):
+        return "overlaypc7"
 
     def setup(self, center, crs, azimut, azimutLeftFL, azimutRightFL):
         self.center = center
@@ -38,12 +40,6 @@ class OverlayPC7Layer(QgsPluginLayer):
         self.azimutRightFL = azimutRightFL
 
         self.setCrs(crs, False)
-
-    def writeSymbology(self, node, doc, errorMsg):
-        return True
-
-    def readSymbology(self, node, errorMsg):
-        return True
 
     def createMapRenderer(self, rendererContext):
         return Renderer(self, rendererContext)
@@ -108,7 +104,7 @@ class OverlayPC7Layer(QgsPluginLayer):
     def writeXml(self, layer_node, document, context):
         layerEl = layer_node.toElement()
         layerEl.setAttribute("type", "plugin")
-        layerEl.setAttribute("name", self.pluginLayerType())
+        layerEl.setAttribute("name", self.layerTypeKey())
         layerEl.setAttribute("title", self.layer_name)
         layerEl.setAttribute("transparency", self.transparency)
         layerEl.setAttribute("x", self.center.x())
@@ -231,12 +227,17 @@ class Renderer(QgsMapLayerRenderer):
         return True
 
 
-class OverlayPC7LayerType(QgsPluginLayerType):
-    def __init__(self):
-        QgsPluginLayerType.__init__(self, OverlayPC7Layer.pluginLayerType())
+class OverlayPC7LayerType(KadasPluginLayerType):
+    def __init__(self, actionPC7Layer):
+        KadasPluginLayerType.__init__(self, OverlayPC7Layer.layerType())
+        self.actionEditLayer = QAction(QIcon(":/images/themes/default/mActionToggleEditing.svg"), self.tr("Edit"), self)
+        self.actionEditLayer.triggered.connect(lambda: actionPC7Layer.trigger())
 
     def createLayer(self):
         return OverlayPC7Layer("OverlayPC7")
 
-    def hasLayerProperties(self):
-        return 0
+    def createLayer(self, uri):
+        return OverlayPC7Layer("OverlayPC7")
+
+    def addLayerTreeMenuActions(self, menu, layer):
+        menu.addAction( self.actionEditLayer )

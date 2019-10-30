@@ -82,19 +82,24 @@ class OverlayPC7:
 
         self.action = QAction(icon, self.tr(u'Overlay PC7'),
                               self.iface.mainWindow())
-        self.action.triggered.connect(self.activateTool)
-        self.action.setEnabled(True)
+        self.action.setCheckable(True)
+        self.action.toggled.connect(self.toolToggled)
 
         self.iface.addAction(self.action, self.iface.PLUGIN_MENU,
                              self.iface.DRAW_TAB)
 
-        self.pluginLayerType = OverlayPC7LayerType()
+        self.pluginLayerType = OverlayPC7LayerType(self.action)
         QgsApplication.pluginLayerRegistry().addPluginLayerType(
             self.pluginLayerType)
 
     def unload(self):
-        pass
+        self.iface.removeAction(self.action, self.iface.PLUGIN_MENU,
+                                self.iface.DRAW_TAB)
 
-    def activateTool(self):
-        self.overlay_7_tool = OverlayPC7Tool(self.iface)
-        self.iface.mapCanvas().setMapTool(self.overlay_7_tool)
+    def toolToggled(self, active):
+        if active:
+            self.overlay_7_tool = OverlayPC7Tool(self.iface)
+            self.overlay_7_tool.setAction(self.action)
+            self.iface.mapCanvas().setMapTool(self.overlay_7_tool)
+        elif self.iface.mapCanvas().mapTool() and self.iface.mapCanvas().mapTool().action() == self.action:
+            self.iface.mapCanvas().unsetMapTool(self.iface.mapCanvas().mapTool())
