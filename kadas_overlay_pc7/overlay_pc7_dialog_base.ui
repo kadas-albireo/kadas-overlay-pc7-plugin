@@ -26,21 +26,14 @@
    <property name="bottomMargin">
     <number>2</number>
    </property>
-   <item row="1" column="0" colspan="7">
+   <item row="1" column="0" colspan="5">
     <widget class="Line" name="line">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
     </widget>
    </item>
-   <item row="0" column="0">
-    <widget class="QLabel" name="labelLayer">
-     <property name="text">
-      <string>Layer:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0" colspan="6">
+   <item row="2" column="0" colspan="4">
     <widget class="QWidget" name="widgetLayerSetup" native="true">
      <property name="enabled">
       <bool>false</bool>
@@ -179,7 +172,7 @@
           <widget class="QToolButton" name="toolButtonPickCenter">
            <property name="icon">
             <iconset>
-             <normaloff>:/kadas/icons/pick</normaloff>:/kadas/icons/pcik</iconset>
+             <normaloff>:/kadas/icons/pick</normaloff>:/kadas/icons/pick</iconset>
            </property>
           </widget>
          </item>
@@ -233,10 +226,14 @@
      </layout>
     </widget>
    </item>
-   <item row="0" column="2">
-    <widget class="QComboBox" name="comboBoxLayer"/>
+   <item row="0" column="0">
+    <layout class="QHBoxLayout" name="layerSelectionWidgetHolder">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+    </layout>
    </item>
-   <item row="0" column="4">
+   <item row="0" column="1" colspan="3">
     <spacer name="horizontalSpacer">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -248,14 +245,6 @@
       </size>
      </property>
     </spacer>
-   </item>
-   <item row="0" column="3">
-    <widget class="QToolButton" name="toolButtonAddLayer">
-     <property name="icon">
-      <iconset>
-       <normaloff>:/images/themes/default/mActionAdd.svg</normaloff>:/images/themes/default/mActionAdd.svg</iconset>
-     </property>
-    </widget>
    </item>
   </layout>
  </widget>
