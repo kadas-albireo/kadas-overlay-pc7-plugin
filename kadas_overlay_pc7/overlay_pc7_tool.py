@@ -23,7 +23,7 @@ class OverlayPC7Tool(QgsMapTool):
         self.picking = False
 
         layer = iface.layerTreeView().currentLayer()
-        if not layer:
+        if not layer or not isinstance(layer, OverlayPC7Layer):
             for layerId  in QgsProject.instance().mapLayers():
                 projLayer = QgsProject.instance().mapLayer(layerId)
                 if isinstance(projLayer, OverlayPC7Layer):
