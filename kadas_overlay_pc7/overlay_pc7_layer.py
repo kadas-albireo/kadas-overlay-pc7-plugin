@@ -233,10 +233,7 @@ class OverlayPC7LayerType(KadasPluginLayerType):
         self.actionEditLayer = QAction(QIcon(":/images/themes/default/mActionToggleEditing.svg"), self.tr("Edit"), self)
         self.actionEditLayer.triggered.connect(lambda: actionPC7Layer.trigger())
 
-    def createLayer(self):
-        return OverlayPC7Layer("OverlayPC7")
-
-    def createLayer(self, uri):
+    def createLayer(self, uri=None):
         return OverlayPC7Layer("OverlayPC7")
 
     def addLayerTreeMenuActions(self, menu, layer):
