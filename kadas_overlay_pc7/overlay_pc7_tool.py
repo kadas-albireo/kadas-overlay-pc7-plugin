@@ -31,6 +31,7 @@ class OverlayPC7Tool(QgsMapTool):
                     break
 
         self.widget = OverlayPC7Widget(self.iface, layer)
+        self.widget.adjustSize()
 
         self.setCursor(Qt.ArrowCursor)
         self.widget.requestPickCenter.connect(self.setPicking)
