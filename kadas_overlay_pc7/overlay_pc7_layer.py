@@ -21,7 +21,7 @@ class OverlayPC7Layer(KadasPluginLayer):
         self.azimut = None
         self.azimutLeftFL = None  # Azimut left flight line
         self.azimutRightFL = None  # Azimut right flight line
-        self.color = Qt.red
+        self.color = Qt.GlobalColor.red
         self.lineWidth = 3
         self.transparency = 0
         self.layer_name = layer_name
@@ -138,7 +138,7 @@ class Renderer(QgsMapLayerRenderer):
         self.rendererContext.painter().setOpacity((
             100. - self.layer.transparency) / 100.)
         self.rendererContext.painter().setCompositionMode(
-            QPainter.CompositionMode_Source)
+            QPainter.CompositionMode.CompositionMode_Source)
         self.rendererContext.painter().setPen(
             QPen(self.layer.color, self.layer.lineWidth))
 
@@ -194,7 +194,7 @@ class Renderer(QgsMapLayerRenderer):
 
         # draw flight lines
         self.rendererContext.painter().setPen(QPen(
-            self.layer.color, self.layer.lineWidth, Qt.DashLine))
+            self.layer.color, self.layer.lineWidth, Qt.PenStyle.DashLine))
         lineRadiusMeters = 1.5 * QgsUnitTypes.fromUnitToUnitFactor(
             QgsUnitTypes.DistanceNauticalMiles, QgsUnitTypes.DistanceMeters)
         for bearing in [self.layer.getAzimutLeftFL(True),
