@@ -24,12 +24,12 @@ from qgis.PyQt.QtCore import *
 from qgis.PyQt.QtGui import *
 from qgis.PyQt.QtWidgets import *
 from kadas.kadasgui import *
-from . import resources_rc
 from .overlay_pc7_tool import OverlayPC7Tool
 from .overlay_pc7_layer import OverlayPC7LayerType
 import os.path
 from qgis.core import *
 
+PLUGIN_DIR = os.path.dirname(__file__)
 
 class OverlayPC7:
     """QGIS Plugin Implementation."""
@@ -77,7 +77,7 @@ class OverlayPC7:
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        icon_path = ':/plugins/OverlayPC7/icon.png'
+        icon_path = os.path.join(PLUGIN_DIR, 'icon.png')
         icon = QIcon(icon_path)
 
         self.action = QAction(icon, self.tr(u'Overlay PC7'),
