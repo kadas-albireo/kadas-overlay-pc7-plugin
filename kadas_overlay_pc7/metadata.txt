@@ -9,7 +9,7 @@
 [general]
 name=overlay_pc7
 qgisMinimumVersion=3.0
-qgisMaximumVersion=3.99
+qgisMaximumVersion=4.99
 description=This plugin paints an overlay
 version=2.0.1
 author=Sourcepole AG
